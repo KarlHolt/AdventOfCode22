@@ -1,41 +1,68 @@
-import math
+import time
 
-with open("Day3input.txt", "r") as file:
-    Total = 0
-    a = 0
-    lines = ["", "", ""]
-    for line in file:
-        if a < 2:
-            lines[a] = line
-            a += 1
-            continue
-        if a == 2:
-            lines[a] = line
-        a = 0
-        
-        for char in lines[0]:
-            if char in lines[1] and char in lines[2]:
-                intchar = ord(char)
-                if intchar < 97:
-                    Total += intchar - 64 + 26
+def char_value(A):
+    AI = ord(A)
+    if AI < 97:
+        return AI - 64 + 26
+    else:
+        return AI - 96
+
+def part1():
+    with open("Day3input.txt", "r") as file:
+        Total = 0
+        for line in file:
+            line = line.strip()
+            
+            half = len(line)//2
+
+            first = sorted(line[0:half])
+            second = sorted(line[half:])
+            
+            i=j=0
+            while True:
+                if first[i] == second[j]:
+                    Total += char_value(first[i])
+                    break
+                elif first[i] > second[j] and j < half - 1:
+                    j += 1
+                elif first[i] < second[j] and i < half - 1:
+                    i += 1
                 else:
-                    Total += intchar - 96
-                break
-        continue
-        #Part 1
-        line = line.strip()
-        n = len(line)
-        first = line[0:math.ceil(n/2)]
-        second = line[math.floor(n/2):]
+                    break
+        return Total
 
-        for i in range(len(first)):
-            char = first[i]
-            if char in second and char not in first[:i]:
-                intchar = ord(char)
-                if intchar < 97:
-                    Total += intchar - 64 + 26
+def part2():
+    with open("Day3input.txt", "r") as file:
+        Total = 0
+        a = 0
+        lines = ["", "", ""]
+        for line in file:
+            if a < 3:
+                lines[a] = sorted(line)[1:]
+                a+=1
+                if a < 3:
+                    continue
+            a = 0
+
+            i=j=k=0
+            while True:
+                if lines[0][i] == lines[1][j] == lines[2][k]:
+                    Total += char_value(lines[0][i])
                     break
-                else: 
-                    Total += intchar - 96
-                    break
-    print(Total)
+                minchar = min(lines[0][i], lines[1][j], lines[2][k])
+                if minchar == lines[0][i]:
+                    i+=1
+                elif minchar == lines[1][j]:
+                    j+=1
+                else:
+                    k+=1
+        return Total
+
+
+now = time.time()
+print("part 1: ", part1())
+print(time.time() - now)
+
+now = time.time()
+print("part 2:", part2())
+print(time.time() - now)
