@@ -1,6 +1,6 @@
 def solution(x):
     with open("Day6input.txt", "r") as file:
-        buffer = []
+        buffer = []        
         for line in file:
             for char in line:
                 buffer.append(char)
