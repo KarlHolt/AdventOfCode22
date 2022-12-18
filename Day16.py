@@ -8,8 +8,9 @@ def parse():
             nodes = re.findall("[A-Z][A-Z]", line)
             graph["nodes"].append(nodes[0])
             graph["flows"][nodes[0]] = eval(re.findall("[0-9]+", line)[0])
+            graph["edges"][nodes[0]] = []
             for node in nodes[1:]:
-                graph["edges"].append([nodes[0], node])
+                graph["edges"][nodes[0]].append(node)
         return graph
 
 def count_flow(g):
@@ -24,13 +25,12 @@ def dist(sn, en, g):
 
     while len(queue) > 0:
         temp = queue.pop(0)
-        for edge in g["edges"]:
-            if temp[0] in edge:
-                index = edge.index(temp[0])
-                if en in edge:
-                    return temp[1] + 1
-                if edge[(index + 1) % 2] not in visited:
-                    queue.append([edge[(index + 1) % 2], temp[1] + 1])
+        for path in g["edges"][temp[0]]:
+            if path == en:
+                return temp[1] + 1
+            if path not in visited:
+                queue.append([path, temp[1] + 1])
+                visited.append(path)
     return 1000
 
 def find_min(g):
@@ -56,40 +56,34 @@ def find_min(g):
     return end
 
 def simulate(g, plan, cost):
-    sum = 0
-    moving = 0
     start = "AA"
-    target = ""
-    for i in range(30):
-        sum += count_flow(g)
-        if moving > 0:
-            moving -= 1
-            continue
-        if target != "" and target not in g["opened"]:
-            start = target
-            g["opened"].append(target)
-            continue
-        if len(plan) == 0:
-            continue
-        target = plan.pop(0)
-        moving = cost[start][target] - 1
-    return sum
+    left = 30
+    t_flow = 0
+    for t in plan:
+        flow = count_flow(g)
+        consumed_time = cost[start][t]
+        start = t
+        if left < consumed_time + 1:
+            break
+        left -= (consumed_time + 1)
+        t_flow += flow * (consumed_time + 1)
+        g["opened"].append(t)
+    flow = count_flow(g)
+    return t_flow + left * flow
         
 def part1(g):
     cost = find_min(g)
-    print(cost)
     nodes = [x for x in cost]
     nodes.remove("AA")
     permutations = itertools.permutations(nodes, len(nodes))
     high = 0
     i = 0
     for perm in permutations:
-        if i % 100 == 0:
-            print(i)
         g["opened"] = []
         perm = list(perm)
         temp = simulate(g, perm, cost)
         if temp > high:
+            print(temp)
             high = temp
         i += 1
     return high
