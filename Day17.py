@@ -57,6 +57,7 @@ def push_rock(rock, wind_direction):
 def space_to_move_rock(rock, wind_blow, board):
     height_rock = len(rock)
     
+    for i in range(
 
 def collusion(rock, board, height):
     pass
